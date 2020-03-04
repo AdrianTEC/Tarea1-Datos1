@@ -7,13 +7,19 @@ public class Paquete implements Serializable //para enviar el paquete tengo que 
     private String Nombre;
     private String ip;
     private String mensaje;
+    private Integer port;
+
+
 
     public Paquete(){
         Nombre="";
         ip="";
         mensaje="";
+        port=9999;
     }
+    public Integer getPort() { return port; }
 
+    public void setPort(Integer port) { this.port = port; }
     public String getNombre() {
         return Nombre;
     }

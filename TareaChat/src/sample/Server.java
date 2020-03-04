@@ -26,8 +26,10 @@ public class Server extends Application implements Runnable {
     private String mensaje;
     private Label DIALOGBOX=new Label();;
     private Label Myip=new Label();
+    private Label port =new Label();
     private String Log="";
     private Thread Hilo;
+    private Integer EnterPortNumber= 1025;
 
     /*Star builds Server Window
         Using JAVAFX
@@ -59,19 +61,24 @@ public class Server extends Application implements Runnable {
         Myip.setLayoutX(30);
         Myip.setLayoutY(350);
         Myip.setFont(Font.font("Verdana", FontWeight.BOLD, 14));
-        Myip.setText("   La ip del servidor es la siguiente; "+address.getHostAddress()+"  ");
+        Myip.setText("   The server ip is ; "+address.getHostAddress()+"  ");
         Myip.setStyle("-fx-background-color: #5073b5;-fx-background-radius: 30");
 
+        port.setLayoutX(30);
+        port.setLayoutY(320);
+        port.setFont(Font.font("Verdana", FontWeight.BOLD, 14));
+        port.setStyle("-fx-background-color: #5073b5;-fx-background-radius: 30");
         // I ADD THE COMPONENTS TO THE ROOT
         Pane root = new Pane();
-        root.getChildren().add(Myip);
-        root.getChildren().add(DIALOGBOX);
-        root.getChildren().add(icon);
+        root.getChildren().addAll(Myip,DIALOGBOX,icon,port);
+
         root.setStyle("-fx-background-color: #202f4a");
         Serverstage.setScene(new Scene(root, 500, 400));
         Serverstage.setResizable(false);
 
         Serverstage.show();
+        SetPort();
+        port.setText("   The server port is  ; "+EnterPortNumber+"  ");
         Hilo= new Thread(this);
         Hilo.start();
 
@@ -79,13 +86,14 @@ public class Server extends Application implements Runnable {
     /* Run function is  in charge of keep server listenning client demands while Server Window is on.
 
     */
+
     @Override
     public void run() {
 
 
         try {
 
-            ServerSocket servidor= new ServerSocket(9999); //intenta hacer la conexion
+            ServerSocket servidor= new ServerSocket(EnterPortNumber); //intenta hacer la conexion
             Paquete paquete_rec;
 
             //noinspection InfiniteLoopStatement
@@ -159,5 +167,67 @@ public class Server extends Application implements Runnable {
         } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
         }
+    }
+    /*SetPort finds an available port for client connections, it modify the integer EnterPortNumber until finds
+    a available port.
+
+     */
+
+    public void SetPort(){
+        boolean flag= true;
+        while (flag && EnterPortNumber <= 60000 ) {
+            EnterPortNumber +=1;
+            try {
+                ServerSocket servidorPrueba = new ServerSocket(EnterPortNumber);
+                servidorPrueba.close();
+                flag=false;
+            } catch (IOException e) {
+                System.out.println("PortOccupiedError");
+                e.printStackTrace();
+            }
+
+        }
+    }
+
+}
+
+/*User is a class that save the user information like Nickname, IP, and entrancePort
+it allows me to connect with different entrance port users
+
+
+ */
+class user{
+
+
+    String Nickname;
+    String Ip;
+    Integer EntrancePort;
+    public user(){
+        Nickname="";
+        Ip="";
+        EntrancePort=9999;
+    }
+    public String getNickname() {
+        return Nickname;
+    }
+
+    public void setNickname(String nickname) {
+        Nickname = nickname;
+    }
+
+    public String getIp() {
+        return Ip;
+    }
+
+    public void setIp(String ip) {
+        Ip = ip;
+    }
+
+    public Integer getEntrancePort() {
+        return EntrancePort;
+    }
+
+    public void setEntrancePort(Integer entrancePort) {
+        EntrancePort = entrancePort;
     }
 }

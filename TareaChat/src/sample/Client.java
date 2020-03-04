@@ -9,7 +9,6 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.Scene;
-import javafx.scene.control.DialogPane;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
@@ -35,15 +34,17 @@ public class Client extends Application implements Runnable {
     private String ip;
     private String message;
     private String Log="";
-
     private String userName2;
     private String message2;
-
-    private TextField ipDirecctionS = new TextField();
-    private Paquete letter= new Paquete();
-
     private Label DIALOGBOX= new Label();
-/* The start function is in charge of building the client window and show it
+    private Paquete letter= new Paquete();
+    private TextField ExitPort= new TextField();
+    private Label ENTERPort= new Label();
+    private TextField ipDirecctionS = new TextField();
+    private Integer EnterPortNumber=1025;
+
+
+    /* The start function is in charge of building the client window and show it
 
  */
     @Override
@@ -100,17 +101,16 @@ public class Client extends Application implements Runnable {
 
 
         //EXIT AND ENTER PORTS
-        TextField ExitPort= new TextField();
+
         ExitPort.setPrefSize(70,30);
         ExitPort.setLayoutY(225);
         ExitPort.setPromptText("ExitPort");
         ExitPort.setLayoutX(410);
         ExitPort.setStyle("-fx-background-color: #5073b5");
 
-        TextField ENTERPort= new TextField();
+
         ENTERPort.setPrefSize(70,30);
         ENTERPort.setLayoutY(260);
-        ENTERPort.setPromptText("EnterPort");
         ENTERPort.setLayoutX(410);
         ENTERPort.setStyle("-fx-background-color: #5073b5");
 
@@ -182,16 +182,20 @@ public class Client extends Application implements Runnable {
         Thread HiloCliente= new Thread(this);
         HiloCliente.start();
     }
-
     private void SendMesagge(){
-    //compressing data
-    letter.setIp(ip);
-    letter.setNombre(userName);
-    letter.setMensaje(message);
+        if (ENTERPort.getText()==""){
+            SetPort();
+            ENTERPort.setText(String.valueOf(EnterPortNumber));
+        }
+        //compressing data in package
+        letter.setPort(EnterPortNumber);
+        letter.setIp(ip);
+        letter.setNombre(userName);
+        letter.setMensaje(message);
 
         try {
             //CREO SOCKET
-            Socket puente = new Socket(ipDirecctionS.getText(),9999);
+            Socket puente = new Socket(ipDirecctionS.getText(), Integer.parseInt(ExitPort.getText()));
 
             ObjectOutputStream informacion = new ObjectOutputStream(puente.getOutputStream());
 
@@ -206,8 +210,6 @@ public class Client extends Application implements Runnable {
 
 
     }
-
-
     @Override
     public void run() {
         try {
@@ -234,6 +236,26 @@ public class Client extends Application implements Runnable {
 
         } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
+        }
+    }
+
+
+
+    public void SetPort(){
+        boolean flag= true;
+        while (flag && EnterPortNumber <= 60000 ) {
+            EnterPortNumber +=1;
+            if (EnterPortNumber!=Integer.parseInt(ExitPort.getText())) {
+                try {
+                    ServerSocket servidorPrueba = new ServerSocket(EnterPortNumber);
+                    servidorPrueba.close();
+                    flag = false;
+                    servidorPrueba.close();
+                } catch (IOException e) {
+                    System.out.println("PortOccupiedError");
+                    e.printStackTrace();
+                }
+            }
         }
     }
 }
