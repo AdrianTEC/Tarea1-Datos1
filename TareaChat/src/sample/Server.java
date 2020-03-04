@@ -12,24 +12,33 @@ import javafx.scene.layout.Pane;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
+import java.util.ArrayList;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 
+
+
 public class Server extends Application implements Runnable {
+
     private String nick;
     private String ip;
     private String mensaje;
+    private Integer SomePort;
+
     private Label DIALOGBOX=new Label();;
     private Label Myip=new Label();
     private Label port =new Label();
     private String Log="";
     private Thread Hilo;
     private Integer EnterPortNumber= 1025;
+    private ArrayList<Object> registro= new ArrayList<Object>(); //[[1,2],[3,4]]  [1,2]
+    private String Remitent_IP;
 
     /*Star builds Server Window
         Using JAVAFX
@@ -38,6 +47,7 @@ public class Server extends Application implements Runnable {
 
     @Override
     public void start(Stage Serverstage) throws Exception {
+
         Serverstage.setTitle("SERVER");
         //I ADD THE DUCK ICON
         Image image = new Image("sample/Delivery Duck.png");
@@ -125,8 +135,17 @@ public class Server extends Application implements Runnable {
 
                 //Redefino las variables del objeto paquete_rec
                 nick = paquete_rec.getNombre();
-                ip = paquete_rec.getIp();
+                ip = paquete_rec.getIp(); ///ESTA IP ES A QUIEN VA DIRIGIDO
                 mensaje = paquete_rec.getMensaje();
+                SomePort= paquete_rec.getPort(); //PUERTO DE QUIEN LO ENVIA
+                Remitent_IP= paquete_rec.getRemitente();
+
+                if(!registro.contains(Remitent_IP)){
+                    registro.add(Remitent_IP);
+                    registro.add(SomePort);
+                }
+
+
 
                 /* Get from https://www.reddit.com/r/javahelp/comments/7qvqau/problem_with_updating_gui_javafx/
                 * it allows me to edit the DialogBox what is bein used by Hilo
@@ -143,7 +162,7 @@ public class Server extends Application implements Runnable {
                 //establezco un puente hasta el otro  cliente
                 if(!ip.equals("")) {
                     ObjectOutputStream P_reenvio;
-                    try (Socket destino = new Socket(ip, 9090)) {
+                    try (Socket destino = new Socket(ip, (Integer) registro.get(registro.indexOf(ip)))) {
                         P_reenvio = new ObjectOutputStream(destino.getOutputStream());
 
                         //sobrescribo  a P_reenvio con la información del paquete recibido
@@ -191,43 +210,4 @@ public class Server extends Application implements Runnable {
 
 }
 
-/*User is a class that save the user information like Nickname, IP, and entrancePort
-it allows me to connect with different entrance port users
 
-
- */
-class user{
-
-
-    String Nickname;
-    String Ip;
-    Integer EntrancePort;
-    public user(){
-        Nickname="";
-        Ip="";
-        EntrancePort=9999;
-    }
-    public String getNickname() {
-        return Nickname;
-    }
-
-    public void setNickname(String nickname) {
-        Nickname = nickname;
-    }
-
-    public String getIp() {
-        return Ip;
-    }
-
-    public void setIp(String ip) {
-        Ip = ip;
-    }
-
-    public Integer getEntrancePort() {
-        return EntrancePort;
-    }
-
-    public void setEntrancePort(Integer entrancePort) {
-        EntrancePort = entrancePort;
-    }
-}

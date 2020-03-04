@@ -8,8 +8,15 @@ public class Paquete implements Serializable //para enviar el paquete tengo que 
     private String ip;
     private String mensaje;
     private Integer port;
+    private String remitente;
 
+    public String getRemitente() {
+        return remitente;
+    }
 
+    public void setRemitente(String remitente) {
+        this.remitente = remitente;
+    }
 
     public Paquete(){
         Nombre="";

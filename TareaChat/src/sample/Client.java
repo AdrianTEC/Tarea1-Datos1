@@ -36,6 +36,7 @@ public class Client extends Application implements Runnable {
     private String Log="";
     private String userName2;
     private String message2;
+    private String MY_IP_ADDRESS;
     private Label DIALOGBOX= new Label();
     private Paquete letter= new Paquete();
     private TextField ExitPort= new TextField();
@@ -128,20 +129,17 @@ public class Client extends Application implements Runnable {
 
         //get from https://www.lawebdelprogramador.com/codigo/Java/2532-Obtener-la-IP-local-y-la-IP-de-un-dominio.html
         InetAddress address = InetAddress.getLocalHost();
-        //
+        MY_IP_ADDRESS=address.getHostAddress();
         Label Myip=new Label();
         Myip.setLayoutX(0);
         Myip.setLayoutY(0);
-        Myip.setText("  Su dirección ip es la siguiente:  "+address.getHostAddress()+"  ");
+        Myip.setText("  Su dirección ip es la siguiente:  "+MY_IP_ADDRESS+"  ");
         Myip.setStyle("-fx-background-color: #5073b5;-fx-background-radius: 30");
         Myip.setFont(Font.font("Verdana", FontWeight.BOLD, 10));
 
-
-
-
-
         // I ADD THE BUTTON
         Button btn = new Button();
+        btn.setDisable(true);
         btn.setText("Send");
         btn.setPrefHeight(40);
         btn.setStyle("-fx-background-color: #395385");
@@ -154,19 +152,36 @@ public class Client extends Application implements Runnable {
                 message= textbox.getText();
                 Log+="\n"+"<"+userName+">"  + message ;
                 DIALOGBOX.setText(Log );
-                SendMesagge();
+                try {
+                    SendMesagge();
+                }catch (Exception e){
+                    Log+= "\n"+"<SERVIDOR>" + "Puerto erróneo o vacio";
+                    DIALOGBOX.setText(Log);
+
+                }
+
                 textbox.setText("");
 
             }
         });
         btn.setLayoutX(340);
         btn.setLayoutY(330);
+        //button for port
+        Button generator= new Button();
+        generator.setLayoutX(400);
+        generator.setLayoutY(330);
 
+        generator.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent actionEvent) {
+                btn.setDisable(false);
+            }
+        });
 
 
         // I ADD THE COMPONENTS TO THE ROOT
         Pane root = new Pane();
-        root.getChildren().addAll(hostname,ipDirecctionS,DIALOGBOX,ENTERPort,Myip,nick,ipDirecction,textbox,btn,icon,ExitPort);
+        root.getChildren().addAll(generator,hostname,ipDirecctionS,DIALOGBOX,ENTERPort,Myip,nick,ipDirecction,textbox,btn,icon,ExitPort);
         root.setStyle("-fx-background-color: #202f4a");
 
 
@@ -192,6 +207,7 @@ public class Client extends Application implements Runnable {
         letter.setIp(ip);
         letter.setNombre(userName);
         letter.setMensaje(message);
+        letter.setRemitente(MY_IP_ADDRESS);
 
         try {
             //CREO SOCKET
@@ -205,7 +221,7 @@ public class Client extends Application implements Runnable {
 
 
         } catch (UnknownHostException errores){ errores.printStackTrace(); }
-          catch (IOException e1){ DIALOGBOX.setText(Log+"\n"+"Time out ERROR"); }
+          catch (IOException e1){ DIALOGBOX.setText(Log+"\n"+"<SERVIDOR>"+"Time out ERROR, verifique la ip destino  \n la permanencia a la misma red , o la  disponibilidad de \n un servidor"); }
 
 
 
