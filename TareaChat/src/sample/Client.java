@@ -16,11 +16,14 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
 
+import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
@@ -34,14 +37,15 @@ public class Client extends Application implements Runnable {
     private String Log="";
 
     private String userName2;
-    private String ip2;
     private String message2;
 
-
+    private TextField ipDirecctionS = new TextField();
     private Paquete letter= new Paquete();
 
     private Label DIALOGBOX= new Label();
+/* The start function is in charge of building the client window and show it
 
+ */
     @Override
     public void start(Stage primaryStage) throws  Exception {
 
@@ -51,27 +55,65 @@ public class Client extends Application implements Runnable {
         ImageView icon = new ImageView(image);
         icon.setFitHeight(103);
         icon.setFitWidth(103);
-        icon.setLayoutX(330);
+        icon.setLayoutX(310);
+
         // I ADD THE TEXT FIELD
         TextField textbox = new TextField();
-
         textbox.setPrefSize(300, 40);
         textbox.setLayoutY(330);
         textbox.setLayoutX(20);
         textbox.setStyle("-fx-background-color: #5073b5");
+
+
         // IP TEXT FIELD
         TextField ipDirecction = new TextField();
         ipDirecction.setPrefSize(100, 30);
         ipDirecction.setLayoutY(100);
         ipDirecction.setLayoutX(380);
         ipDirecction.setPromptText("IP Address");
+        ipDirecction.setStyle("-fx-background-color: #5073b5");
+
+        //Server IP TEXT FIELD
+        Label hostname= new Label();
+        hostname.setText("  Server Address  ");
+        hostname.setLayoutX(380);
+        hostname.setLayoutY(155);
+        hostname.setStyle("-fx-background-color: #395385;-fx-background-radius: 15");
+
+
+        ipDirecctionS.setPrefSize(100, 30);
+        ipDirecctionS.setLayoutY(180);
+        ipDirecctionS.setLayoutX(380);
+        ipDirecctionS.setPromptText("Host");
+        ipDirecctionS.setText("127.0.0.1");
+        ipDirecctionS.setStyle("-fx-background-color: #5073b5");
+
 
         // nick nick FIELD
         TextField nick = new TextField();
         nick.setPrefSize(100, 30);
-        nick.setLayoutY(140);
+        nick.setLayoutY(110);
         nick.setLayoutX(380);
         nick.setPromptText("Sender");
+        nick.setText("Duck");
+        nick.setStyle("-fx-background-color: #5073b5");
+
+
+        //EXIT AND ENTER PORTS
+        TextField ExitPort= new TextField();
+        ExitPort.setPrefSize(70,30);
+        ExitPort.setLayoutY(225);
+        ExitPort.setPromptText("ExitPort");
+        ExitPort.setLayoutX(410);
+        ExitPort.setStyle("-fx-background-color: #5073b5");
+
+        TextField ENTERPort= new TextField();
+        ENTERPort.setPrefSize(70,30);
+        ENTERPort.setLayoutY(260);
+        ENTERPort.setPromptText("EnterPort");
+        ENTERPort.setLayoutX(410);
+        ENTERPort.setStyle("-fx-background-color: #5073b5");
+
         //I ADD THE DIALOG PANEL
 
 
@@ -84,12 +126,25 @@ public class Client extends Application implements Runnable {
         DIALOGBOX.setAlignment(Pos.TOP_LEFT);
         DIALOGBOX.setPadding(new Insets(10, 10, 10, 10));
 
+        //get from https://www.lawebdelprogramador.com/codigo/Java/2532-Obtener-la-IP-local-y-la-IP-de-un-dominio.html
+        InetAddress address = InetAddress.getLocalHost();
+        //
+        Label Myip=new Label();
+        Myip.setLayoutX(0);
+        Myip.setLayoutY(0);
+        Myip.setText("  Su dirección ip es la siguiente:  "+address.getHostAddress()+"  ");
+        Myip.setStyle("-fx-background-color: #5073b5;-fx-background-radius: 30");
+        Myip.setFont(Font.font("Verdana", FontWeight.BOLD, 10));
+
+
+
+
 
         // I ADD THE BUTTON
         Button btn = new Button();
         btn.setText("Send");
         btn.setPrefHeight(40);
-        btn.setStyle("-fx-background-color: #5073b5");
+        btn.setStyle("-fx-background-color: #395385");
         btn.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
@@ -97,7 +152,7 @@ public class Client extends Application implements Runnable {
                 ip= ipDirecction.getText();
                 userName= nick.getText();
                 message= textbox.getText();
-                Log+="<"+userName+"> : "+ message + "\n";
+                Log+="\n"+"<"+userName+">"  + message ;
                 DIALOGBOX.setText(Log );
                 SendMesagge();
                 textbox.setText("");
@@ -106,19 +161,24 @@ public class Client extends Application implements Runnable {
         });
         btn.setLayoutX(340);
         btn.setLayoutY(330);
-        Pane root = new Pane();
-        // I ADD THE COMPONENTS TO THE ROOT
-        root.getChildren().add(nick);
-        root.getChildren().add(ipDirecction);
-        root.getChildren().add(DIALOGBOX);
-        root.getChildren().add(textbox);
 
-        root.getChildren().add(btn);
-        root.getChildren().add(icon);
+
+
+        // I ADD THE COMPONENTS TO THE ROOT
+        Pane root = new Pane();
+        root.getChildren().addAll(hostname,ipDirecctionS,DIALOGBOX,ENTERPort,Myip,nick,ipDirecction,textbox,btn,icon,ExitPort);
         root.setStyle("-fx-background-color: #202f4a");
+
+
+
         primaryStage.setScene(new Scene(root, 500, 400));
         primaryStage.setResizable(false);
+
         primaryStage.show();
+
+
+        //Opens the thread for multitasking
+
         Thread HiloCliente= new Thread(this);
         HiloCliente.start();
     }
@@ -131,7 +191,7 @@ public class Client extends Application implements Runnable {
 
         try {
             //CREO SOCKET
-            Socket puente = new Socket("192.168.18.27",9999);
+            Socket puente = new Socket(ipDirecctionS.getText(),9999);
 
             ObjectOutputStream informacion = new ObjectOutputStream(puente.getOutputStream());
 

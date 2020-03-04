@@ -9,6 +9,8 @@ import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
+import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
 
 import java.io.IOException;
@@ -23,6 +25,7 @@ public class Server extends Application implements Runnable {
     private String ip;
     private String mensaje;
     private Label DIALOGBOX=new Label();;
+    private Label Myip=new Label();
     private String Log="";
     private Thread Hilo;
 
@@ -49,8 +52,19 @@ public class Server extends Application implements Runnable {
         DIALOGBOX.setPadding(new Insets(10, 10, 10, 10));
 
 
+
+        //get from https://www.lawebdelprogramador.com/codigo/Java/2532-Obtener-la-IP-local-y-la-IP-de-un-dominio.html
+        InetAddress address = InetAddress.getLocalHost();
+        //
+        Myip.setLayoutX(30);
+        Myip.setLayoutY(350);
+        Myip.setFont(Font.font("Verdana", FontWeight.BOLD, 14));
+        Myip.setText("   La ip del servidor es la siguiente; "+address.getHostAddress()+"  ");
+        Myip.setStyle("-fx-background-color: #5073b5;-fx-background-radius: 30");
+
         // I ADD THE COMPONENTS TO THE ROOT
         Pane root = new Pane();
+        root.getChildren().add(Myip);
         root.getChildren().add(DIALOGBOX);
         root.getChildren().add(icon);
         root.setStyle("-fx-background-color: #202f4a");
