@@ -119,11 +119,13 @@ public class Server extends Application implements Runnable {
 
                     InetAddress location=  puenteS.getInetAddress();
                     String IpRemota = location.getHostAddress();
-                    System.out.println(IpRemota);
+                    if (!registro.contains(IpRemota) && !IpRemota.equals("127.0.0.1")){
                     Log+= "\n" + IpRemota + "Is connected";
                     Platform.runLater(()->{
                         DIALOGBOX.setText( Log);
-                    });
+                    });}
+
+
                 }
 
 
@@ -171,7 +173,8 @@ public class Server extends Application implements Runnable {
                         P_reenvio.close();
                         //CIERRO LOS FLUJOS DE DATOS
                     } catch (Exception W) {
-                        System.out.println("NO SE PUDO CONECTAR");
+
+
 
                     }
                 }
@@ -195,13 +198,13 @@ public class Server extends Application implements Runnable {
     public void SetPort(){
         boolean flag= true;
         while (flag && EnterPortNumber <= 60000 ) {
-            EnterPortNumber +=1;
+            EnterPortNumber= (int) (Math.random() * 60000) + 1025;
             try {
                 ServerSocket servidorPrueba = new ServerSocket(EnterPortNumber);
                 servidorPrueba.close();
                 flag=false;
             } catch (IOException e) {
-                System.out.println("PortOccupiedError");
+
                 e.printStackTrace();
             }
 

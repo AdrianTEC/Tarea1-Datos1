@@ -65,6 +65,7 @@ public class Client extends Application implements Runnable {
         textbox.setLayoutY(330);
         textbox.setLayoutX(20);
         textbox.setStyle("-fx-background-color: #5073b5");
+        textbox.setDisable(true);
 
 
         // IP TEXT FIELD
@@ -72,7 +73,7 @@ public class Client extends Application implements Runnable {
         ipDirecction.setPrefSize(100, 30);
         ipDirecction.setLayoutY(100);
         ipDirecction.setLayoutX(380);
-        ipDirecction.setPromptText("IP Address");
+        ipDirecction.setPromptText("Receptor IP Address");
         ipDirecction.setStyle("-fx-background-color: #5073b5");
 
         //Server IP TEXT FIELD
@@ -92,11 +93,17 @@ public class Client extends Application implements Runnable {
 
 
         // nick nick FIELD
+        Label textNick= new Label();
+        textNick.setText("Sender Name");
+        textNick.setStyle("-fx-background-color: #5073b5;-fx-background-radius: 30");
+        textNick.setLayoutX(410);
+        textNick.setLayoutY(20);
+
         TextField nick = new TextField();
-        nick.setPrefSize(100, 30);
-        nick.setLayoutY(110);
-        nick.setLayoutX(380);
-        nick.setPromptText("Sender");
+        nick.setPrefSize(70, 30);
+        nick.setLayoutY(40);
+        nick.setLayoutX(410);
+        nick.setPromptText("Your name");
         nick.setText("Duck");
         nick.setStyle("-fx-background-color: #5073b5");
 
@@ -127,13 +134,19 @@ public class Client extends Application implements Runnable {
         DIALOGBOX.setAlignment(Pos.TOP_LEFT);
         DIALOGBOX.setPadding(new Insets(10, 10, 10, 10));
 
-        //get from https://www.lawebdelprogramador.com/codigo/Java/2532-Obtener-la-IP-local-y-la-IP-de-un-dominio.html
+        //How to get my IP
+        // get from https://www.lawebdelprogramador.com/codigo/Java/2532-Obtener-la-IP-local-y-la-IP-de-un-dominio.html
+
+
+
         InetAddress address = InetAddress.getLocalHost();
         MY_IP_ADDRESS=address.getHostAddress();
+
+
         Label Myip=new Label();
         Myip.setLayoutX(0);
         Myip.setLayoutY(0);
-        Myip.setText("  Su dirección ip es la siguiente:  "+MY_IP_ADDRESS+"  ");
+        Myip.setText("  Your Ip address is :  "+MY_IP_ADDRESS+"  ");
         Myip.setStyle("-fx-background-color: #5073b5;-fx-background-radius: 30");
         Myip.setFont(Font.font("Verdana", FontWeight.BOLD, 10));
 
@@ -150,7 +163,11 @@ public class Client extends Application implements Runnable {
                 ip= ipDirecction.getText();
                 userName= nick.getText();
                 message= textbox.getText();
+
+                if(!textbox.getText().isEmpty()){
+
                 Log+="\n"+"<"+userName+">"  + message ;
+
                 DIALOGBOX.setText(Log );
                 try {
                     SendMesagge();
@@ -160,28 +177,51 @@ public class Client extends Application implements Runnable {
 
                 }
 
-                textbox.setText("");
+                textbox.setText("");}
 
             }
         });
         btn.setLayoutX(340);
         btn.setLayoutY(330);
+
+
+
         //button for port
         Button generator= new Button();
         generator.setLayoutX(400);
         generator.setLayoutY(330);
-
+        generator.setStyle("-fx-background-color: #395385");
+        generator.setPrefHeight(40);
+        generator.setPrefWidth(80);
+        generator.setText("Gen.Port");
         generator.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent actionEvent) {
+                try {
+                    if(!ExitPort.getText().isEmpty()) {
+                        message="";
+                        userName="Finding ports";
+                        ip="";
                 btn.setDisable(false);
+                generator.setDisable(true);
+                textbox.setDisable(false);
+                SendMesagge();}
+                    else {
+                        Log+="\n Please insert a Exit Port";
+                        DIALOGBOX.setText(Log);
+                    }
+                }catch (Exception e){
+                    btn.setDisable(true);
+                    generator.setDisable(false);
+                    textbox.setDisable(true);
+                }
             }
         });
 
 
         // I ADD THE COMPONENTS TO THE ROOT
         Pane root = new Pane();
-        root.getChildren().addAll(generator,hostname,ipDirecctionS,DIALOGBOX,ENTERPort,Myip,nick,ipDirecction,textbox,btn,icon,ExitPort);
+        root.getChildren().addAll(textNick,generator,hostname,ipDirecctionS,DIALOGBOX,ENTERPort,Myip,nick,ipDirecction,textbox,btn,icon,ExitPort);
         root.setStyle("-fx-background-color: #202f4a");
 
 
@@ -199,7 +239,11 @@ public class Client extends Application implements Runnable {
     }
     private void SendMesagge(){
         if (ENTERPort.getText()==""){
-            SetPort();
+            try {
+                SetPort();
+            }catch (Exception e){
+                DIALOGBOX.setText(Log + "\n port error");
+            }
             ENTERPort.setText(String.valueOf(EnterPortNumber));
         }
         //compressing data in package
@@ -259,20 +303,23 @@ public class Client extends Application implements Runnable {
 
     public void SetPort(){
         boolean flag= true;
-        while (flag && EnterPortNumber <= 60000 ) {
-            EnterPortNumber +=1;
-            if (EnterPortNumber!=Integer.parseInt(ExitPort.getText())) {
-                try {
-                    ServerSocket servidorPrueba = new ServerSocket(EnterPortNumber);
-                    servidorPrueba.close();
-                    flag = false;
-                    servidorPrueba.close();
-                } catch (IOException e) {
-                    System.out.println("PortOccupiedError");
-                    e.printStackTrace();
+
+
+            while (flag && EnterPortNumber <= 60000) {
+                EnterPortNumber= (int) (Math.random() * 60000) + 1025;
+                if (EnterPortNumber != Integer.parseInt(ExitPort.getText())) {
+                    try {
+                        ServerSocket servidorPrueba = new ServerSocket(EnterPortNumber);
+                        servidorPrueba.close();
+                        flag = false;
+                        servidorPrueba.close();
+                    } catch (IOException e) {
+
+                        e.printStackTrace();
+                    }
                 }
             }
-        }
+
     }
 }
 
