@@ -22,14 +22,17 @@ import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-
+/* Server class builds a server Console Window and processes data flows between clients
+ * @author Adrian Gonzalez Jimenez
+ * @Version 02/03/2020
+ */
 
 public class Server extends Application implements Runnable {
 
     private String nick;
     private String ip;
     private String mensaje;
-    private Integer SomePort;
+    private int SomePort;
 
     private Label DIALOGBOX=new Label();;
     private Label Myip=new Label();
@@ -37,12 +40,14 @@ public class Server extends Application implements Runnable {
     private String Log="";
     private Thread Hilo;
     private Integer EnterPortNumber= 1025;
-    private ArrayList<Object> registro= new ArrayList<Object>(); //[[1,2],[3,4]]  [1,2]
+    private ArrayList<String> registro= new ArrayList<String>();
+    private ArrayList<Integer> registro2= new ArrayList<Integer>();
     private String Remitent_IP;
 
-    /*Star builds Server Window
-        Using JAVAFX
-            Using Thread
+    /*Start method is in charge of building Server Window
+     * @author Adrian Gonzalez Jimenez
+     * @Version 02/03/2020
+     * @param nothing
      */
 
     @Override
@@ -93,9 +98,13 @@ public class Server extends Application implements Runnable {
         Hilo.start();
 
     }
-    /* Run function is  in charge of keep server listenning client demands while Server Window is on.
-
-    */
+    /* Run method is  in charge of keeping the server listenning client requests while Server Window is on.
+     * @author Adrian Gonzalez Jimenez
+     * @Version 02/03/2020
+     * @param nothing
+     * @throws UnknownHostException
+     * @throws IOException
+     */
 
     @Override
     public void run() {
@@ -143,8 +152,12 @@ public class Server extends Application implements Runnable {
                 Remitent_IP= paquete_rec.getRemitente();
 
                 if(!registro.contains(Remitent_IP)){
+
                     registro.add(Remitent_IP);
-                    registro.add(SomePort);
+
+                    registro2.add(SomePort);
+
+
                 }
 
 
@@ -161,16 +174,23 @@ public class Server extends Application implements Runnable {
 
 
 
-                //establezco un puente hasta el otro  cliente
-                if(!ip.equals("")) {
-                    ObjectOutputStream P_reenvio;
-                    try (Socket destino = new Socket(ip, (Integer) registro.get(registro.indexOf(ip)))) {
-                        P_reenvio = new ObjectOutputStream(destino.getOutputStream());
+                //ASK IF IP IS EMPTY
 
-                        //sobrescribo  a P_reenvio con la información del paquete recibido
+                if(!ip.equals("")) {
+                    try{
+                        //BUILD SOCKET TO DESTINATARY
+                        Socket destino = new Socket(ip, 9999 );
+                        // MAKE A DATA FLOW
+                        ObjectOutputStream P_reenvio = new ObjectOutputStream(destino.getOutputStream());
+
+
+                        //OVERWRITTING P_reenvio DATA WITH P_recibido
                         P_reenvio.writeObject(paquete_rec);
+
+                        //CLOSES SOCKETS
                         destino.close();
                         P_reenvio.close();
+
                         //CIERRO LOS FLUJOS DE DATOS
                     } catch (Exception W) {
 
@@ -194,7 +214,11 @@ public class Server extends Application implements Runnable {
     a available port.
 
      */
-
+    /*This finds a free port for receiving data packages
+     * @Version 04/03/2020
+     * @param nothing
+     * @throws IOException
+     */
     public void SetPort(){
         boolean flag= true;
         while (flag && EnterPortNumber <= 60000 ) {

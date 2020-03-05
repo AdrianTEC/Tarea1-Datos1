@@ -45,9 +45,11 @@ public class Client extends Application implements Runnable {
     private Integer EnterPortNumber=1025;
 
 
-    /* The start function is in charge of building the client window and show it
-
- */
+    /*The start function is in charge of building the client window and show it
+     *@author Adrián González Jiménez
+     *@Version 02/03/2020
+     * @param Stage primaryStage
+    */
     @Override
     public void start(Stage primaryStage) throws  Exception {
 
@@ -83,7 +85,7 @@ public class Client extends Application implements Runnable {
         hostname.setLayoutY(155);
         hostname.setStyle("-fx-background-color: #395385;-fx-background-radius: 15");
 
-
+        // THAT'S THE SERVER IP ADDRESS
         ipDirecctionS.setPrefSize(100, 30);
         ipDirecctionS.setLayoutY(180);
         ipDirecctionS.setLayoutX(380);
@@ -199,13 +201,12 @@ public class Client extends Application implements Runnable {
             public void handle(ActionEvent actionEvent) {
                 try {
                     if(!ExitPort.getText().isEmpty()) {
-                        message="";
-                        userName="Finding ports";
-                        ip="";
+                SetPort();
+                ENTERPort.setText(String.valueOf(EnterPortNumber));
                 btn.setDisable(false);
                 generator.setDisable(true);
                 textbox.setDisable(false);
-                SendMesagge();}
+                ;}
                     else {
                         Log+="\n Please insert a Exit Port";
                         DIALOGBOX.setText(Log);
@@ -237,15 +238,17 @@ public class Client extends Application implements Runnable {
         Thread HiloCliente= new Thread(this);
         HiloCliente.start();
     }
+
+    /* This build the Client Window
+     *@author Adrian González Jimenez
+     * @Version 04/03/2020
+     * @param nothing
+     * @throws UnknownHostException
+     * @throws IOException
+     */
     private void SendMesagge(){
-        if (ENTERPort.getText()==""){
-            try {
-                SetPort();
-            }catch (Exception e){
-                DIALOGBOX.setText(Log + "\n port error");
-            }
-            ENTERPort.setText(String.valueOf(EnterPortNumber));
-        }
+
+
         //compressing data in package
         letter.setPort(EnterPortNumber);
         letter.setIp(ip);
@@ -254,12 +257,13 @@ public class Client extends Application implements Runnable {
         letter.setRemitente(MY_IP_ADDRESS);
 
         try {
-            //CREO SOCKET
+            //BUILD SOCKET
             Socket puente = new Socket(ipDirecctionS.getText(), Integer.parseInt(ExitPort.getText()));
-
+            //CREATE DATA FLOW
             ObjectOutputStream informacion = new ObjectOutputStream(puente.getOutputStream());
-
+            //PUT THE PACKAGE IN THE DATA FLOW
             informacion.writeObject(letter);
+            //CLOSES SOCKETS
             puente.close(); //cierro el socket
             informacion.close();
 
@@ -268,29 +272,42 @@ public class Client extends Application implements Runnable {
           catch (IOException e1){ DIALOGBOX.setText(Log+"\n"+"<SERVIDOR>"+"Time out ERROR, verifique la ip destino  \n la permanencia a la misma red , o la  disponibilidad de \n un servidor"); }
 
 
+        }
 
-    }
+    /*This executes listening function, looking for data imputs and modifies DIALOG BOX
+     *@author Adrian Gonzalez Jimenez
+     * @Version 04/03/2020
+     * @param nothing
+     * @throws IOException | ClassNotFoundException
+     */
     @Override
     public void run() {
         try {
-            ServerSocket Servertoclient= new ServerSocket(9090);
+
+            // CREATE SOCKET
+            ServerSocket Servertoclient= new ServerSocket(9999);
             Paquete paquete_rec;
 
             while (true){
+                //ACCEPT CONNECTIONS IN PORT
                 Socket puenteS = Servertoclient.accept();
+                // CREATING DATA FLOW
                 ObjectInputStream informacion = new ObjectInputStream(puenteS.getInputStream());
+                // INTERCEPT A PACKAGE
                 paquete_rec = (Paquete) informacion.readObject();
 
-                //Redefino las variables del objeto paquete_rec
+                //SAVE PACKAGE DATA
                 userName2 = paquete_rec.getNombre();
                 ip = paquete_rec.getIp();
                 message2 = paquete_rec.getMensaje();
 
 
                 Log+= "\n"+"<"+userName2+">  :"+ message2;
+                //ALLOWS INTERACTION BETWEEN THREADS
                 Platform.runLater(()->{
                     DIALOGBOX.setText(Log);
                 });
+
             }
 
 
@@ -300,26 +317,25 @@ public class Client extends Application implements Runnable {
     }
 
 
-
+    /*This finds a free port for receiving data packages
+     * @Version 04/03/2020
+     * @param nothing
+     * @throws IOException
+     */
     public void SetPort(){
         boolean flag= true;
+        while (flag && EnterPortNumber <= 60000 ) {
+            EnterPortNumber= (int) (Math.random() * 60000) + 1025;
+            try {
+                ServerSocket servidorPrueba = new ServerSocket(EnterPortNumber);
+                servidorPrueba.close();
+                flag=false;
+            } catch (IOException e) {
 
-
-            while (flag && EnterPortNumber <= 60000) {
-                EnterPortNumber= (int) (Math.random() * 60000) + 1025;
-                if (EnterPortNumber != Integer.parseInt(ExitPort.getText())) {
-                    try {
-                        ServerSocket servidorPrueba = new ServerSocket(EnterPortNumber);
-                        servidorPrueba.close();
-                        flag = false;
-                        servidorPrueba.close();
-                    } catch (IOException e) {
-
-                        e.printStackTrace();
-                    }
-                }
+                e.printStackTrace();
             }
 
+        }
     }
 }
 

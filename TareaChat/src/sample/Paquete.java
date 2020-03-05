@@ -1,7 +1,11 @@
 package sample;
 
 import java.io.Serializable;
-
+/* Paquete class makes packages for data flows
+ * @author Adrian Gonzalez Jimenez
+ * @Version 04/03/2020
+ *
+ */
 public class Paquete implements Serializable //para enviar el paquete tengo que convertirlo en una serie de bites
 {
     private String Nombre;
@@ -10,6 +14,7 @@ public class Paquete implements Serializable //para enviar el paquete tengo que 
     private Integer port;
     private String remitente;
 
+    //SETTERS AND GETTERS
     public String getRemitente() {
         return remitente;
     }
